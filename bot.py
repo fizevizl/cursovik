@@ -16,10 +16,10 @@ def start_message(message, callback_data=None):
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_handler(call):
-    if call.data == "button_1":
-        bot.send_message(call.message.chat.id, "Вы нажали: Кнопка 1")
-    elif call.data == "button_2":
-        bot.send_message(call.message.chat.id, "Вы нажали: Кнопка 2")
+    if call.data == "s":
+        bot.send_message(call.message.chat.id, "Ви студент")
+    elif call.data == "v":
+        bot.send_message(call.message.chat.id, "Ви викладач")
     # Уведомление Telegram о завершении обработки callback
     bot.answer_callback_query(call.id)
 
