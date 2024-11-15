@@ -1,7 +1,7 @@
 import telebot
-import config
+import config0
 
-bot = telebot.TeleBot(config.token)
+bot = telebot.TeleBot(config0.token)
 
 bot.message_handler(commands=['start'])
 def start_message(message, callback_data=None):
