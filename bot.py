@@ -1,7 +1,9 @@
 import telebot
-import config0
+import os
+from dotenv import load_dotenv, dotenv_values 
+load_dotenv() 
 
-bot = telebot.TeleBot(config0.token)
+bot = telebot.TeleBot(os.getenv("BOTTOKEN"))
 
 bot.message_handler(commands=['start'])
 def start_message(message, callback_data=None):
