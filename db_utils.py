@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS faculties (
 ''')
 
 cursor.execute('''
-CREATE TABLE IF NOT EXISTS kurs (
+CREATE TABLE IF NOT EXISTS groups (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL
 )
