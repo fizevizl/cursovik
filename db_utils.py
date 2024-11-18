@@ -14,6 +14,12 @@ CREATE TABLE IF NOT EXISTS faculties (
 )
 ''')
 
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS kurs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL
+)
+''')
 
 # Сохраняем изменения и закрываем соединение
 connection.commit()
