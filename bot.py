@@ -162,7 +162,6 @@ def offer_groups_by_course_and_faculty(message, faculty_id, course_id):
 
 # Отображение расписания для выбранной группы
 def offer_schedule_for_group(message, group_id):
-    print("***")
     try:
         bot_db = sqlite3.connect(db_path)
         cur = bot_db.cursor()
@@ -173,7 +172,7 @@ def offer_schedule_for_group(message, group_id):
             FROM schedule 
             WHERE group_id = ?
         '''
-        print(f"{group_id=}")
+
         schedule = cur.execute(sql, (group_id,)).fetchall()
 
         if not schedule:
