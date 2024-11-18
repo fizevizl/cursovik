@@ -21,6 +21,21 @@ CREATE TABLE IF NOT EXISTS groups (
 )
 ''')
 
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS raspisanie (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    group_id INTEGER NOT NULL,
+    day_of_week TEXT NOT NULL,
+    time TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    teacher_name TEXT NOT NULL,
+    video_link TEXT NOT NULL,
+    FOREIGN KEY (group_id) REFERENCES groups(id)
+)
+''')
+
+
+               
 # Сохраняем изменения и закрываем соединение
 connection.commit()
 connection.close()
