@@ -163,37 +163,69 @@ def offer_groups_by_course_and_faculty(message, faculty_id, course_id):
 # Отображение расписания для выбранной группы
 def offer_schedule_for_group(message, group_id):
     try:
+        # Подключение к базе данных
         bot_db = sqlite3.connect(db_path)
         cur = bot_db.cursor()
 
-        # SQL-запрос для получения расписания
+        # SQL-запрос для получения расписания для группы, отсортированного по дням недели и номеру урока
         sql = '''
-            SELECT day_of_week, subject, teacher_name, video_link 
-            FROM schedule 
+            SELECT day_of_week, lesson_number, subject, teacher_name, video_link
+            FROM schedule
             WHERE group_id = ?
+            ORDER BY 
+                CASE day_of_week
+                    WHEN 'Monday' THEN 1
+                    WHEN 'Tuesday' THEN 2
+                    WHEN 'Wednesday' THEN 3
+                    WHEN 'Thursday' THEN 4
+                    WHEN 'Friday' THEN 5
+                    WHEN 'Saturday' THEN 6
+                    WHEN 'Sunday' THEN 7
+                END, lesson_number
         '''
-
         schedule = cur.execute(sql, (group_id,)).fetchall()
 
         if not schedule:
-            bot.send_message(message.chat.id, "На жаль, немає розкладу для цієї групи.")
+            bot.send_message(message.chat.id, "На жаль, для цієї групи немає доступного розкладу.")
             return
 
-        # Формирование текста с расписанием
-        schedule_text = "Розклад для цієї групи:\n"
-        for day, subject, teacher_name, video_link in schedule:
-            schedule_text += f"{day}: {subject}\n"
-            schedule_text += f"Викладач: {teacher_name}\n"
-            schedule_text += f"Посилання на відеоконференцію: {video_link}\n\n"
+        # Словарь для отображения дней недели
+        days_translation = {
+            'Monday': 'Понеділок',
+            'Tuesday': 'Вівторок',
+            'Wednesday': 'Середа',
+            'Thursday': 'Четвер',
+            'Friday': 'П’ятниця',
+            'Saturday': 'Субота',
+            'Sunday': 'Неділя'
+        }
 
-        # Отправка расписания
-        bot.send_message(message.chat.id, text=schedule_text)
+         # Сгруппировать занятия по дням недели
+        schedule_by_day = {day: [] for day in days_translation.keys()}
+        for entry in schedule:
+            day, lesson_number, subject, teacher, link = entry
+            schedule_by_day[day].append((lesson_number, subject, teacher, link))
+
+         # Формируем текст расписания
+        schedule_text = "📅 *Розклад на тиждень:*\n\n"
+        for day in days_translation.keys():
+            schedule_text += f"🔹 *{days_translation[day]}:*\n"  # Переводим день на украинский
+            if schedule_by_day[day]:
+                for lesson_number, subject, teacher, link in sorted(schedule_by_day[day]):
+                    schedule_text += f"  # {lesson_number}) {subject}\n"
+                    schedule_text += f"     Викладач:  {teacher}\n"
+                    schedule_text += f"     Посилання:  [Перейти до конференції]({link})\n"
+            else:
+                schedule_text += "  Немає занять\n"
+            schedule_text += "\n"
+
+        # Отправляем текст пользователю
+        bot.send_message(message.chat.id, schedule_text, parse_mode='Markdown', disable_web_page_preview=True)
 
     except sqlite3.Error as e:
         bot.send_message(message.chat.id, f"Помилка доступу до бази даних: {e}")
     finally:
         bot_db.close()
-
 
 # Запуск бота
 bot.polling(none_stop=True)
