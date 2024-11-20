@@ -1,4 +1,13 @@
 Идеи для реализации...
 
-таблица Учителя (id, fio, academic title)
-таблица Предметы (id, subjname, link)
+заполнить таблицы в дальнейшем
+
+реализация get_num_of_week_by_date
+текущая дата - дата первого дня в семестре + 1 
+
+
+ teacher_id INTEGER NOT NULL,
+    video_link TEXT NOT NULL,
+    FOREIGN KEY (group_id) REFERENCES groups(id),
+    FOREIGN KEY (teacher_id) REFERENCES teachers(id)
+)

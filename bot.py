@@ -1,6 +1,7 @@
 import telebot
 import sqlite3
 import os
+from datetime import datetime as dt
 from dotenv import load_dotenv
 from constants import WEEKDAYS, LAST_WEEK_DAY
 
@@ -12,6 +13,10 @@ bot = telebot.TeleBot(os.getenv("BOTTOKEN"))
 
 # Путь к базе данных
 db_path = 'data.db'
+
+# TODO доделать
+def get_num_of_week_by_date(date):
+    return 11
 
 # функция для начала и выбора роли
 @bot.message_handler(commands=['start'])
@@ -57,7 +62,6 @@ def callback_handler(call):
         # Пользователь выбрал группу
         group_id = int(call.data.split('_')[1])
         bot.answer_callback_query(call.id)
-        bot.send_message(call.message.chat.id, f"Ви обрали групу: {group_id}. Дякуємо за вибір!")
         offer_schedule_for_group(call.message,group_id)
 
 # выбор факультета, Генерирует список факультетов из базы данных и отправляет их как inline-кнопки.
@@ -191,17 +195,19 @@ def offer_schedule_for_group(message, group_id):
             schedule_by_day[day_name].append((lesson_number, subject, teacher, link))
 
          # Формируем текст расписания
-        schedule_text = "📅 *Розклад на тиждень:*\n\n"
+        week_num = get_num_of_week_by_date(dt.now())
+        schedule_text = f"📅 *Поточний тиждень №{week_num}*\n"
+        schedule_text += "  *Розклад на тиждень:*\n\n"
         for day in  WEEKDAYS[:LAST_WEEK_DAY]:  
             schedule_text += f"🔹 *{day}:*\n"
             if schedule_by_day[day]:
                 for lesson_number, subject, teacher, link in sorted(schedule_by_day[day]):
-                    schedule_text += f"  # {lesson_number}) {subject}\n"
+                    schedule_text += f"№{lesson_number}.  {subject}\n"
                     schedule_text += f"     Викладач:  {teacher}\n"
                     schedule_text += f"     Посилання:  [Перейти до конференції]({link})\n"
             else:
                 schedule_text += "  Немає занять\n"
-            schedule_text += f"{'-' * 50}\n"
+            schedule_text += f"{'-' * 60}\n"
 
         # Отправляем текст пользователю
         bot.send_message(message.chat.id, schedule_text, parse_mode='Markdown', disable_web_page_preview=True)
