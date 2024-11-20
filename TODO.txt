@@ -1,0 +1,4 @@
+Идеи для реализации...
+
+таблица Учителя (id, fio, academic title)
+таблица Предметы (id, subjname, link)

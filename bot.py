@@ -2,6 +2,7 @@ import telebot
 import sqlite3
 import os
 from dotenv import load_dotenv
+from constants import WEEKDAYS, LAST_WEEK_DAY
 
 # Загружаем переменные окружения
 load_dotenv()
@@ -172,16 +173,7 @@ def offer_schedule_for_group(message, group_id):
             SELECT day_of_week, lesson_number, subject, teacher_name, video_link
             FROM schedule
             WHERE group_id = ?
-            ORDER BY 
-                CASE day_of_week
-                    WHEN 'Monday' THEN 1
-                    WHEN 'Tuesday' THEN 2
-                    WHEN 'Wednesday' THEN 3
-                    WHEN 'Thursday' THEN 4
-                    WHEN 'Friday' THEN 5
-                    WHEN 'Saturday' THEN 6
-                    WHEN 'Sunday' THEN 7
-                END, lesson_number
+            ORDER BY day_of_week, lesson_number
         '''
         schedule = cur.execute(sql, (group_id,)).fetchall()
 
@@ -189,27 +181,19 @@ def offer_schedule_for_group(message, group_id):
             bot.send_message(message.chat.id, "На жаль, для цієї групи немає доступного розкладу.")
             return
 
-        # Словарь для отображения дней недели
-        days_translation = {
-            'Monday': 'Понеділок',
-            'Tuesday': 'Вівторок',
-            'Wednesday': 'Середа',
-            'Thursday': 'Четвер',
-            'Friday': 'П’ятниця',
-            'Saturday': 'Субота',
-            'Sunday': 'Неділя'
-        }
+         # Создаем словарь для хранения расписания, ключи — названия дней недели
+        schedule_by_day = {day: [] for day in WEEKDAYS}
 
-         # Сгруппировать занятия по дням недели
-        schedule_by_day = {day: [] for day in days_translation.keys()}
+        # Заполняем расписание
         for entry in schedule:
             day, lesson_number, subject, teacher, link = entry
-            schedule_by_day[day].append((lesson_number, subject, teacher, link))
+            day_name = WEEKDAYS[day - 1]
+            schedule_by_day[day_name].append((lesson_number, subject, teacher, link))
 
          # Формируем текст расписания
         schedule_text = "📅 *Розклад на тиждень:*\n\n"
-        for day in days_translation.keys():
-            schedule_text += f"🔹 *{days_translation[day]}:*\n"  # Переводим день на украинский
+        for day in  WEEKDAYS[:LAST_WEEK_DAY]:  
+            schedule_text += f"🔹 *{day}:*\n"
             if schedule_by_day[day]:
                 for lesson_number, subject, teacher, link in sorted(schedule_by_day[day]):
                     schedule_text += f"  # {lesson_number}) {subject}\n"
@@ -217,7 +201,7 @@ def offer_schedule_for_group(message, group_id):
                     schedule_text += f"     Посилання:  [Перейти до конференції]({link})\n"
             else:
                 schedule_text += "  Немає занять\n"
-            schedule_text += "\n"
+            schedule_text += f"{'-' * 50}\n"
 
         # Отправляем текст пользователю
         bot.send_message(message.chat.id, schedule_text, parse_mode='Markdown', disable_web_page_preview=True)
