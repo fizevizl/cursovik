@@ -174,7 +174,7 @@ def offer_schedule_for_group(message, group_id):
 
         # SQL-запрос для получения расписания для группы, отсортированного по дням недели и номеру урока
         sql = '''
-            SELECT day_of_week, lesson_number, subject, teacher_name, video_link
+            SELECT day_of_week, lesson_number, subject_id, teacher_id, video_link
             FROM schedule
             WHERE group_id = ?
             ORDER BY day_of_week, lesson_number
@@ -190,9 +190,9 @@ def offer_schedule_for_group(message, group_id):
 
         # Заполняем расписание
         for entry in schedule:
-            day, lesson_number, subject, teacher, link = entry
+            day, lesson_number, subject_id, teacher_id, link = entry
             day_name = WEEKDAYS[day - 1]
-            schedule_by_day[day_name].append((lesson_number, subject, teacher, link))
+            schedule_by_day[day_name].append((lesson_number, subject_id, teacher_id, link))
 
          # Формируем текст расписания
         week_num = get_num_of_week_by_date(dt.now())
@@ -201,9 +201,9 @@ def offer_schedule_for_group(message, group_id):
         for day in  WEEKDAYS[:LAST_WEEK_DAY]:  
             schedule_text += f"🔹 *{day}:*\n"
             if schedule_by_day[day]:
-                for lesson_number, subject, teacher, link in sorted(schedule_by_day[day]):
-                    schedule_text += f"№{lesson_number}.  {subject}\n"
-                    schedule_text += f"     Викладач:  {teacher}\n"
+                for lesson_number, subject_id, teacher_id, link in sorted(schedule_by_day[day]):
+                    schedule_text += f"№{lesson_number}.  {subject_id}\n"
+                    schedule_text += f"     Викладач:  {teacher_id}\n"
                     schedule_text += f"     Посилання:  [Перейти до конференції]({link})\n"
             else:
                 schedule_text += "  Немає занять\n"
