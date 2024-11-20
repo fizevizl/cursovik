@@ -6,8 +6,3 @@
 текущая дата - дата первого дня в семестре + 1 
 
 
- teacher_id INTEGER NOT NULL,
-    video_link TEXT NOT NULL,
-    FOREIGN KEY (group_id) REFERENCES groups(id),
-    FOREIGN KEY (teacher_id) REFERENCES teachers(id)
-)
