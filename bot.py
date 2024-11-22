@@ -3,8 +3,7 @@ import sqlite3
 import os
 from datetime import datetime
 from dotenv import load_dotenv
-from constants import WEEKDAYS, LAST_WEEK_DAY
-
+from constants import WEEKDAYS, LAST_WEEK_DAY, FIRST_DATE_IN_FIRST_WEEK
 # Загружаем переменные окружения
 load_dotenv()
 
@@ -14,8 +13,7 @@ bot = telebot.TeleBot(os.getenv("BOTTOKEN"))
 # Путь к базе данных
 db_path = 'data.db'
 
-semester_start_date = datetime(2024, 9, 1)
-current_date = datetime.now() 
+semester_start_date = datetime.strptime(FIRST_DATE_IN_FIRST_WEEK, '%d/%m/%Y')
 
 def get_num_of_week_by_date(curent_data, semester_start_date):
 
@@ -200,6 +198,7 @@ def offer_schedule_for_group(message, group_id):
             schedule_by_day[day_name].append((lesson_number, subject_id, teacher_id, link))
 
         # Формируем текст расписания
+        current_date = datetime.now()
         week_num = get_num_of_week_by_date(current_date, semester_start_date)
         schedule_text = f"📅 *Поточний тиждень №{week_num}*\n"
         schedule_text += "  *Розклад на тиждень:*\n\n"
