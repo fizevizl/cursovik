@@ -1,2 +1,2 @@
 # cursovik
-work for cursovik
+work for cursovik telegram bot s raspisaniem
