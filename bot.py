@@ -37,7 +37,6 @@ def callback_handler(call):
     print('***\t', call.data)
     if call.data == "role_student":
         bot.answer_callback_query(call.id)
-        bot.send_message(call.message.chat.id, "Оберіть факультет:")
         offer_faculties(call.message)
 
     if call.data.startswith("fc_"):
