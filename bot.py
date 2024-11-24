@@ -27,7 +27,6 @@ def start_message(message, callback_data=None):
 
     markup = telebot.types.InlineKeyboardMarkup()
     markup.add(telebot.types.InlineKeyboardButton(text='Студент', callback_data='role_student'))
-    markup.add(telebot.types.InlineKeyboardButton(text='Викладач', callback_data='role_teacher'))
     bot.send_message(message.chat.id, text="Вітаю! Хто Ви?", reply_markup=markup)
 
 
@@ -38,18 +37,13 @@ def callback_handler(call):
     print('***\t', call.data)
     if call.data == "role_student":
         bot.answer_callback_query(call.id)
-        bot.send_message(call.message.chat.id, "Ви студент. Оберіть факультет:")
-        offer_faculties(call.message)
-
-    if call.data == "role_teacher":
-        bot.answer_callback_query(call.id)
-        bot.send_message(call.message.chat.id, "Ви викладач. Оберіть факультет:")
+        bot.send_message(call.message.chat.id, "Оберіть факультет:")
         offer_faculties(call.message)
 
     if call.data.startswith("fc_"):
         faculty_id = int(call.data.split('_')[1])
-        bot.answer_callback_query(call.id)
-        bot.send_message(call.message.chat.id, f"Ви обрали факультет: {faculty_id}. Оберіть курс:")
+        bot.answer_callback_query(call.id)        
+        # bot.send_message(call.message.chat.id, f"Ви обрали факультет: {faculty_id}. Оберіть курс:")
         offer_courses_by_faculty(call.message, faculty_id)
 
     elif call.data.startswith("course_"):
@@ -57,7 +51,7 @@ def callback_handler(call):
         faculty_id = int(parts[1])  # Извлекаем faculty_id из callback_data
         course_id = int(parts[2])   # Извлекаем course_id из callback_data
         bot.answer_callback_query(call.id)
-        bot.send_message(call.message.chat.id, f"Ви обрали курс: {course_id}. Оберіть групу:")
+        # bot.send_message(call.message.chat.id, f"Ви обрали курс: {course_id}. Оберіть групу:")
         offer_groups_by_course_and_faculty(call.message, faculty_id, course_id)
 
 
@@ -89,7 +83,13 @@ def offer_faculties(message):
             ))
 
         # Отправка сообщения с кнопками
-        bot.send_message(message.chat.id, text="Оберіть факультет:", reply_markup=markup)
+        # bot.send_message(message.chat.id, text="Оберіть факультет:", reply_markup=markup)
+        bot.edit_message_text(
+            chat_id=message.chat.id,
+            message_id=message.message_id,
+            text="Оберіть факультет:",
+            reply_markup=markup
+        )
 
     except sqlite3.Error as e:
         bot.send_message(message.chat.id, f"Помилка доступу до бази даних: {e}")
@@ -120,7 +120,13 @@ def offer_courses_by_faculty(message, faculty_id):
                 callback_data=f"course_{faculty_id}_{course_id}"
             ))
 
-        bot.send_message(message.chat.id, text="Оберіть курс:", reply_markup=markup)
+        # bot.send_message(message.chat.id, text="Оберіть курс:", reply_markup=markup)
+        bot.edit_message_text(
+            chat_id=message.chat.id,
+            message_id=message.message_id,
+            text="Оберіть курс:",
+            reply_markup=markup
+        )
 
     except sqlite3.Error as e:
         bot.send_message(message.chat.id, f"Помилка доступу до бази даних: {e}")
@@ -160,7 +166,13 @@ def offer_groups_by_course_and_faculty(message, faculty_id, course_id):
             ))
 
         # Отправка сообщения с кнопками
-        bot.send_message(message.chat.id, text="Оберіть групу:", reply_markup=markup)
+        # bot.send_message(message.chat.id, text="Оберіть групу:", reply_markup=markup)
+        bot.edit_message_text(
+            chat_id=message.chat.id,
+            message_id=message.message_id,
+            text="Оберіть групу:",
+            reply_markup=markup
+        )
 
     except sqlite3.Error as e:
         bot.send_message(message.chat.id, f"Помилка доступу до бази даних: {e}")
@@ -177,8 +189,9 @@ def offer_schedule_for_group(message, group_id):
 
         # SQL-запрос для получения расписания для группы, отсортированного по дням недели и номеру урока
         sql = '''
-            SELECT day_of_week, lesson_number, subject_id, teacher_id, video_link
+            SELECT day_of_week, lesson_number, subject_id, teachers.fio, video_link
             FROM schedule
+            JOIN teachers ON schedule.teacher_id = teachers.id
             WHERE group_id = ?
             ORDER BY day_of_week, lesson_number
         '''
