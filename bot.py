@@ -60,6 +60,16 @@ def callback_handler(call):
         bot.answer_callback_query(call.id)
         offer_schedule_for_group(call.message,group_id)
 
+    # кнопки назад
+    elif call.data == "back_to_faculties":
+        bot.answer_callback_query(call.id)
+        offer_faculties(call.message)
+
+    elif call.data.startswith("back_to_courses_"):
+        faculty_id = int(call.data.split('_')[3])
+        bot.answer_callback_query(call.id)
+        offer_courses_by_faculty(call.message, faculty_id)
+
 # выбор факультета, Генерирует список факультетов из базы данных и отправляет их как inline-кнопки.
 def offer_faculties(message):
     try:
@@ -119,6 +129,10 @@ def offer_courses_by_faculty(message, faculty_id):
                 callback_data=f"course_{faculty_id}_{course_id}"
             ))
 
+        markup.add(telebot.types.InlineKeyboardButton(
+            text="Назад",
+            callback_data="back_to_faculties"
+        ))
         # bot.send_message(message.chat.id, text="Оберіть курс:", reply_markup=markup)
         bot.edit_message_text(
             chat_id=message.chat.id,
@@ -164,7 +178,12 @@ def offer_groups_by_course_and_faculty(message, faculty_id, course_id):
                 callback_data=f"gr_{group_id}"
             ))
 
-        # Отправка сообщения с кнопками
+        markup.add(telebot.types.InlineKeyboardButton(
+            text="Назад", 
+            callback_data=f"back_to_courses_{faculty_id}"  
+        ))
+
+
         # bot.send_message(message.chat.id, text="Оберіть групу:", reply_markup=markup)
         bot.edit_message_text(
             chat_id=message.chat.id,
