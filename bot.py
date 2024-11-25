@@ -130,7 +130,7 @@ def offer_courses_by_faculty(message, faculty_id):
             ))
 
         markup.add(telebot.types.InlineKeyboardButton(
-            text="Назад",
+            text="⬅️ Назад",
             callback_data="back_to_faculties"
         ))
         # bot.send_message(message.chat.id, text="Оберіть курс:", reply_markup=markup)
@@ -179,7 +179,7 @@ def offer_groups_by_course_and_faculty(message, faculty_id, course_id):
             ))
 
         markup.add(telebot.types.InlineKeyboardButton(
-            text="Назад", 
+            text="⬅️ Назад", 
             callback_data=f"back_to_courses_{faculty_id}"  
         ))
 
