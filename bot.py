@@ -3,7 +3,7 @@ import sqlite3
 import os
 from datetime import datetime
 from dotenv import load_dotenv
-from constants import WEEKDAYS, LAST_WEEK_DAY, FIRST_DATE_IN_FIRST_WEEK
+from constants import WEEKDAYS, LAST_WEEK_DAY, FIRST_DATE_IN_FIRST_WEEK, NUMS
 # Загружаем переменные окружения
 load_dotenv()
 
@@ -207,7 +207,7 @@ def offer_schedule_for_group(message, group_id):
 
         # SQL-запрос для получения расписания для группы, отсортированного по дням недели и номеру урока
         sql = '''
-            SELECT day_of_week, lesson_number, subjname, teachers.fio, video_link, weeks_of_use
+            SELECT day_of_week, lesson_number, subjname, teachers.academic_title, teachers.fio, video_link, weeks_of_use
             FROM schedule
             JOIN subjects ON schedule.subject_id = subjects.id
             JOIN teachers ON schedule.teacher_id = teachers.id
@@ -225,9 +225,9 @@ def offer_schedule_for_group(message, group_id):
 
         # Заполняем расписание
         for entry in schedule:
-            day, lesson_number, subjname, teacher_id, link, weeks_of_use = entry
+            day, lesson_number, subjname, academic_title, teacher_id, link, weeks_of_use = entry
             day_name = WEEKDAYS[day - 1]
-            schedule_by_day[day_name].append((lesson_number, subjname, teacher_id, link, weeks_of_use))
+            schedule_by_day[day_name].append((lesson_number, subjname, academic_title, teacher_id, link, weeks_of_use))
 
         # Формируем текст расписания
         current_date = datetime.now()
@@ -237,13 +237,13 @@ def offer_schedule_for_group(message, group_id):
         for day in  WEEKDAYS[:LAST_WEEK_DAY]:  
             schedule_text += f"🔹 *{day}:*\n"
             if schedule_by_day[day]:
-                for lesson_number, subjname, teacher_id, link, weeks_of_use in sorted(schedule_by_day[day]):
-                    schedule_text += f"№{lesson_number}.  {subjname} {weeks_of_use}\n"
-                    schedule_text += f"     Викладач:  {teacher_id}\n"
+                for lesson_number, subjname, academic_title, teacher_id, link, weeks_of_use in sorted(schedule_by_day[day]):
+                    schedule_text += f"{NUMS[lesson_number]}.  {subjname} {weeks_of_use}\n"
+                    schedule_text += f"     Викладач: {academic_title} {teacher_id}\n"
                     schedule_text += f"     Посилання:  [Перейти до конференції]({link})\n"
             else:
                 schedule_text += "  Немає занять\n"
-            schedule_text += f"{'-' * 60}\n"
+            schedule_text += f"{'─' * 25}\n"
 
         # Отправляем текст пользователю
         bot.send_message(message.chat.id, schedule_text, parse_mode='Markdown', disable_web_page_preview=True)
